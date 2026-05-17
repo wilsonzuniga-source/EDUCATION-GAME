@@ -201,7 +201,8 @@ function initPuzzle() {
 
 function buildPuzzle() {
   const lvl = APP.level;
-  if (lvl === 1) { puzzleData.cols = 2; puzzleData.rows = 2 }
+  const firstName = STUDENT.nombre.trim().split(' ')[0].toUpperCase();
+  if (lvl === 1) { puzzleData.cols = Math.max(2, firstName.length); puzzleData.rows = 1 }
   else if (lvl === 2) { puzzleData.cols = 3; puzzleData.rows = 2 }
   else { puzzleData.cols = 3; puzzleData.rows = 3 }
   const total = puzzleData.cols * puzzleData.rows;
@@ -214,7 +215,16 @@ function buildPuzzle() {
   puzzleData.placed = new Array(total).fill(false);
   for (let i = 0; i < total; i++) {
     const cell = document.createElement('div');
-    cell.className = 'puzzle-cell'; cell.dataset.index = i; cell.textContent = i + 1;
+    cell.className = 'puzzle-cell'; cell.dataset.index = i; 
+    if (lvl === 1) {
+      const letterChar = i < firstName.length ? firstName[i] : '';
+      cell.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;padding-bottom:10px;opacity:0.5;">
+          <div style="font-size:2rem;font-weight:900">${letterChar}</div>
+          <div style="font-size:1.4rem;font-weight:800">${i + 1}</div>
+        </div>`;
+    } else {
+      cell.textContent = i + 1;
+    }
     cell.ondragover = e => { e.preventDefault(); cell.classList.add('drag-over') };
     cell.ondragleave = () => cell.classList.remove('drag-over');
     cell.ondrop = e => handleDrop(e, cell, i, cw, ch);
@@ -234,6 +244,17 @@ function buildPuzzle() {
     w.className = 'puzzle-piece'; w.style.width = cw + 'px'; w.style.height = ch + 'px';
     w.draggable = true; w.dataset.index = ii;
     const img = document.createElement('img'); img.src = pc.toDataURL(); w.appendChild(img);
+    if (lvl === 1) {
+      const letterChar = ii < firstName.length ? firstName[ii] : '';
+      const color = ['#2ed573', '#ff4757', '#9b59b6', '#2e86de', '#ff9f43', '#1dd1a1'][ii % 6];
+      const indicators = document.createElement('div');
+      indicators.className = 'puzzle-piece-indicators';
+      indicators.innerHTML = `
+        <div class="puzzle-piece-letter" style="color:${color}">${letterChar}</div>
+        <div class="puzzle-piece-num" style="color:${color}">${ii + 1}</div>
+      `;
+      w.appendChild(indicators);
+    }
     w.ondragstart = e => { e.dataTransfer.setData('text/plain', ii); w.classList.add('dragging') };
     w.ondragend = () => w.classList.remove('dragging');
     // Touch
@@ -244,6 +265,9 @@ function buildPuzzle() {
     pDiv.appendChild(w);
   });
   $('puzzlePreview').innerHTML = `<img src="${STUDENT.photo}" alt="Vista previa">`;
+  // Render Student Name Guide below the puzzle area
+  const nameGuide = $('puzzleNameGuide');
+  nameGuide.innerHTML = STUDENT.nombre.toUpperCase().split('').map(letter => `<span class="name-guide-letter">${letter}</span>`).join('');
 }
 
 function handleDrop(e, cell, ci, cw, ch) {
