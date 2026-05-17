@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Autonomía Funcional - Juego Interactivo Accesible</title>
+<meta name="description" content="Juego educativo interactivo de autonomía funcional con accesibilidad auditiva y visual para educación especial.">
+<meta name="theme-color" content="#6C5CE7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Autonomía">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<!-- BOTÓN FLOTANTE ALTAVOZ -->
+<button id="btnRepeatAudio" class="fab-speaker" aria-label="Repetir audio" title="Repetir audio">
+  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.08"/></svg>
+</button>
+
+<!-- OVERLAY REFUERZO POSITIVO -->
+<div id="rewardOverlay" class="reward-overlay hidden" aria-live="polite">
+  <div class="reward-content">
+    <div class="reward-emoji" id="rewardEmoji">🌟</div>
+    <p class="reward-text" id="rewardText">¡Excelente!</p>
+  </div>
+</div>
+
+<!-- ============ PANTALLA 1: REGISTRO DEL ESTUDIANTE ============ -->
+<section id="screenRegister" class="screen active" role="main" aria-label="Registro del estudiante">
+  <div class="container">
+    <h1 class="title-main">🧩 Autonomía Funcional</h1>
+    <p class="subtitle">Juego Interactivo de Aprendizaje</p>
+
+    <!-- Subida de Foto -->
+    <div class="card card-photo">
+      <div class="photo-circle" id="photoPreviewCircle" aria-label="Foto del estudiante">
+        <span class="photo-placeholder">📷</span>
+        <img id="photoPreviewImg" class="photo-img hidden" alt="Foto del estudiante">
+      </div>
+      <label for="photoInput" class="btn btn-secondary btn-upload">📁 Subir Foto del Estudiante</label>
+      <input type="file" id="photoInput" accept="image/*" class="input-file" aria-label="Subir foto">
+    </div>
+
+    <!-- Datos del Estudiante -->
+    <div class="card">
+      <h2 class="card-title">📋 Datos del Estudiante</h2>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="regNombre" class="label-big">Nombre:</label>
+          <input type="text" id="regNombre" class="input-big" placeholder="Ej: Juan" required>
+        </div>
+        <div class="form-group">
+          <label for="regApellido" class="label-big">Apellido:</label>
+          <input type="text" id="regApellido" class="input-big" placeholder="Ej: Pérez" required>
+        </div>
+        <div class="form-group">
+          <label for="regEdad" class="label-big">Edad:</label>
+          <input type="number" id="regEdad" class="input-big" placeholder="Ej: 7" min="3" max="18" required>
+        </div>
+        <div class="form-group">
+          <label for="regMama" class="label-big">Nombre de la Mamá:</label>
+          <input type="text" id="regMama" class="input-big" placeholder="Ej: María López" required>
+        </div>
+        <div class="form-group">
+          <label for="regPapa" class="label-big">Nombre del Papá:</label>
+          <input type="text" id="regPapa" class="input-big" placeholder="Ej: Carlos Pérez" required>
+        </div>
+        <div class="form-group full-width">
+          <label for="regDireccion" class="label-big">Dirección de Domicilio:</label>
+          <input type="text" id="regDireccion" class="input-big" placeholder="Ej: Calle 5 #123, Col. Centro" required>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nivel -->
+    <div class="card">
+      <h2 class="card-title">⭐ Nivel de Dificultad</h2>
+      <div class="level-buttons" role="radiogroup" aria-label="Nivel de dificultad">
+        <button class="btn btn-level active" data-level="1" aria-pressed="true">⭐ Nivel 1<br><small>Selección con imágenes</small></button>
+        <button class="btn btn-level" data-level="2" aria-pressed="false">⭐⭐ Nivel 2<br><small>Completar / Ordenar</small></button>
+        <button class="btn btn-level" data-level="3" aria-pressed="false">⭐⭐⭐ Nivel 3<br><small>Escritura</small></button>
+      </div>
+    </div>
+
+    <button id="btnStartGame" class="btn btn-primary btn-giant">🚀 ¡Comenzar el Juego!</button>
+    <button id="btnDashboard" class="btn btn-outline btn-giant">📊 Panel del Docente</button>
+  </div>
+</section>
+
+<!-- ============ PANTALLA 2: PUZZLE ============ -->
+<section id="screenPuzzle" class="screen" role="main" aria-label="Foto-Rompecabezas">
+  <div class="container">
+    <div class="topbar">
+      <button class="btn btn-back" id="btnBackFromPuzzle">← Volver</button>
+      <h2 class="section-title">📷 Foto-Rompecabezas</h2>
+    </div>
+    <p id="puzzleInstruction" class="instruction" aria-live="polite">Arrastra las piezas al lugar correcto para armar tu foto</p>
+    <div class="puzzle-wrapper">
+      <div id="puzzleTarget" class="puzzle-grid" aria-label="Área destino del rompecabezas"></div>
+      <div id="puzzlePieces" class="puzzle-pieces" aria-label="Piezas desordenadas"></div>
+    </div>
+    <div id="puzzleNameGuide" class="puzzle-name-guide" aria-label="Guía de tu nombre"></div>
+    <div id="puzzlePreview" class="preview-img"></div>
+    <button id="btnSkipPuzzle" class="btn btn-secondary btn-giant">➡️ Ir a las Preguntas</button>
+  </div>
+</section>
+
+<!-- ============ PANTALLA 3: PREGUNTAS ============ -->
+<section id="screenQuestions" class="screen" role="main" aria-label="Preguntas de autonomía">
+  <div class="container">
+    <div class="topbar">
+      <button class="btn btn-back" id="btnBackFromQ">← Volver</button>
+      <h2 id="sectionTitle" class="section-title">Sección</h2>
+    </div>
+    <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+      <div id="progressFill" class="progress-fill"></div>
+    </div>
+    <div id="questionArea" class="card question-card" aria-live="polite"></div>
+    <div class="nav-buttons">
+      <button id="btnSubmitAnswer" class="btn btn-primary btn-giant">✅ Confirmar Respuesta</button>
+    </div>
+    <div id="feedback" class="feedback hidden" aria-live="assertive"></div>
+  </div>
+</section>
+
+<!-- ============ PANTALLA 4: RESULTADO ============ -->
+<section id="screenResult" class="screen" role="main" aria-label="Resultado final">
+  <div class="container center-content">
+    <div class="result-card card">
+      <div class="result-stars">🌟🏆🌟</div>
+      <h2 id="resultTitle" class="title-main">🎉 ¡Felicidades!</h2>
+      <p id="resultMsg" class="subtitle"></p>
+      <div id="resultStats" class="stats-grid"></div>
+      <button id="btnRestart" class="btn btn-primary btn-giant">🔁 Jugar de Nuevo</button>
+      <button id="btnGoToDash" class="btn btn-outline btn-giant">📊 Ver Panel del Docente</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PANTALLA 5: DASHBOARD DOCENTE ============ -->
+<section id="screenDashboard" class="screen" role="main" aria-label="Panel del docente">
+  <div class="container">
+    <div class="topbar">
+      <button class="btn btn-back" id="btnBackFromDash">← Volver</button>
+      <h2 class="section-title">📊 Panel del Docente</h2>
+    </div>
+    <div class="card">
+      <div class="dash-controls">
+        <button id="btnExportData" class="btn btn-secondary">📥 Exportar CSV</button>
+        <button id="btnClearData" class="btn btn-danger">🗑️ Borrar Datos</button>
+      </div>
+      <div class="table-wrap">
+        <table id="dashTable" class="dash-table" aria-label="Registro de estudiantes">
+          <thead><tr>
+            <th>Estudiante</th><th>Nivel</th><th>Sección</th><th>Pregunta</th><th>Errores</th><th>Tiempo (s)</th><th>Fecha</th>
+          </tr></thead>
+          <tbody id="dashBody"></tbody>
+        </table>
+      </div>
+      <p id="dashEmpty" class="text-muted hidden">No hay registros guardados.</p>
+    </div>
+  </div>
+</section>
+
+<script src="app.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./service-worker.js')
+        .then(reg => console.log('SW registrado:', reg.scope))
+        .catch(err => console.log('SW error:', err));
+    });
+  }
+</script>
+</body>
+</html>
